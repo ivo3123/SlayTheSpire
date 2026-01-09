@@ -1,20 +1,22 @@
-use crate::mechanics::base_state::{BaseState, State};
+use crate::mechanics::{Player, base_state::{BaseState, State}};
+use crate::mechanics::card::Deck;
 
 #[derive(Clone, Debug)]
-pub enum EnemyIntent {
+pub enum EnemyAction {
     Attack(i32),
     Defend(i32),
     GainStrength(i32),
     ApplyWeak(i32),
     MultiAttack(i32, i32),   // damage_per_hit, num_hits
-    Unkown,
+    Nothing,
 }
+
+pub type EnemyIntent = Vec<EnemyAction>;
 
 #[derive(Clone, Debug)]
 pub struct BaseEnemy {
     base_state: BaseState,
     id: String,
-    next_move: EnemyIntent,
 }
 
 impl BaseEnemy {
@@ -22,16 +24,11 @@ impl BaseEnemy {
         BaseEnemy {
             base_state: BaseState::new(name, max_health),
             id,
-            next_move: EnemyIntent::Unkown,
         }
     }
     
     pub fn id(&self) -> &str {
         &self.id
-    }
-
-    pub fn next_move(&self) -> &EnemyIntent {
-        &self.next_move
     }
 }
 
@@ -78,4 +75,14 @@ impl State for BaseEnemy {
     fn start_turn(&mut self, armor_fn: Option<&dyn Fn(i32) -> i32>) {
         self.base_state.start_turn(armor_fn)
     }
+}
+
+pub trait EnemyBehavior{
+    fn get_all_possible_intents(&self) -> Vec<EnemyIntent>;
+
+    fn get_next_intent(&self, turn: i32, player: &Player, draw_pile: &Deck, discard_pile: &Deck) -> EnemyIntent;
+    
+    fn execute_intent(&mut self, player: &mut Player, draw_pile: &mut Deck, discard_pile: &mut Deck);
+    
+    fn get_intent_description(&self) -> String;
 }

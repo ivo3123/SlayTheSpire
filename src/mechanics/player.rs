@@ -65,6 +65,8 @@ impl State for Player {
         self.base_state.end_turn()
     }
     fn start_turn(&mut self, armor_fn: Option<&dyn Fn(i32) -> i32>) {
-        self.base_state.start_turn(armor_fn)
+        self.base_state.start_turn(armor_fn);
+
+        self.energy = self.max_energy;
     }
 }
