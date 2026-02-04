@@ -2,6 +2,7 @@
 #[derive(Clone, Debug, PartialEq)]
 pub enum StatusType {
     Strength,
+    Dexterity,
     Vulnerable,
     Weak,
     Poison,
@@ -37,9 +38,6 @@ pub trait State {
     fn is_alive(&self) -> bool;
     fn get_status(&self, status_type: &StatusType) -> i32;
     fn get_all_statuses(&self) -> &Vec<Status>;
-    fn take_damage(&mut self, damage: i32);
-    fn heal(&mut self, amount: i32);
-    fn gain_block(&mut self, amount: i32);
     fn add_status(&mut self, status_type: StatusType, stacks: i32);
 }
 
@@ -88,27 +86,10 @@ impl State for BaseState {
         &self.statuses
     }
     
-    fn take_damage(&mut self, damage: i32) {
-        let actual_damage = (damage - self.block).max(0);
-        self.block = (self.block - damage).max(0);
-        self.current_health -= actual_damage;
-    }
-    
-    fn heal(&mut self, amount: i32) {
-        self.current_health = (self.current_health + amount).min(self.max_health);
-    }
-    
-    fn gain_block(&mut self, amount: i32) {
-        self.block += amount;
-    }
-    
     fn add_status(&mut self, status_type: StatusType, stacks: i32) {
         if let Some(status) = self.statuses.iter_mut().find(|s| s.status_type == status_type) {
             status.stacks += stacks;
-            if status.stacks <= 0 {
-                self.statuses.retain(|s| s.status_type != status_type);
-            }
-        } else if stacks > 0 {
+        } else {
             self.statuses.push(Status::new(status_type, stacks));
         }
     }
