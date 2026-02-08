@@ -1,16 +1,10 @@
-use crate::core::game_state::{GameState, EntityId};
+use crate::core::action::Action;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CardType {
     Attack,
     Skill,
     Power,
-}
-
-pub trait CardEffect: std::fmt::Debug {
-    fn resolve(&self, game_state: &mut GameState, source: EntityId, target: Option<EntityId>);
-    fn description(&self) -> String;
-    fn clone_box(&self) -> Box<dyn CardEffect>;
 }
 
 #[derive(Debug)]
@@ -20,7 +14,7 @@ pub struct Card {
     name: String,
     cost: i32,
     card_type: CardType,
-    effects: Vec<Box<dyn CardEffect>>,
+    effects: Vec<Box<dyn Action>>,
     description: String,
 }
 
@@ -45,7 +39,7 @@ impl Card {
         name: String,
         cost: i32,
         card_type: CardType,
-        effects: Vec<Box<dyn CardEffect>>,
+        effects: Vec<Box<dyn Action>>,
         description: String,
     ) -> Self {
         Card {
@@ -75,7 +69,7 @@ impl Card {
     pub fn card_type(&self) -> &CardType {
         &self.card_type
     }
-    pub fn effects(&self) -> &Vec<Box<dyn CardEffect>> {
+    pub fn effects(&self) -> &Vec<Box<dyn Action>> {
         &self.effects
     }
     pub fn description(&self) -> &str {

@@ -27,6 +27,22 @@ impl Player {
             energy: initial_energy,
         }
     }
+    
+    pub fn get_energy(&self) -> i32 {
+        self.energy
+    }
+    
+    pub fn get_max_energy(&self) -> i32 {
+        self.max_energy
+    }
+    
+    pub fn spend_energy(&mut self, amount: i32) {
+        self.energy = (self.energy - amount).max(0);
+    }
+    
+    pub fn refill_energy(&mut self) {
+        self.energy = self.max_energy;
+    }
 }
 
 impl State for Player {
@@ -68,5 +84,17 @@ impl State for Player {
     
     fn set_health(&mut self, amount: i32) {
         self.base_state.set_health(amount)
+    }
+    
+    fn has_modifier(&self, modifier: &crate::core::base_state::Modifier) -> bool {
+        self.base_state.has_modifier(modifier)
+    }
+    
+    fn add_modifier(&mut self, modifier: crate::core::base_state::Modifier) {
+        self.base_state.add_modifier(modifier)
+    }
+    
+    fn remove_modifier(&mut self, modifier: &crate::core::base_state::Modifier) {
+        self.base_state.remove_modifier(modifier)
     }
 }

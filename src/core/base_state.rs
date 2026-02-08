@@ -9,6 +9,12 @@ pub enum StatusType {
     Frail,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum Modifier {
+    RetainHand,   // Don't discard hand at end of turn (e.g., from a relic)
+    RetainBlock,  // Don't remove block at start of turn (Barricade card)
+}
+
 #[derive(Clone, Debug)]
 pub struct Status {
     pub status_type: StatusType,
@@ -28,6 +34,7 @@ pub struct BaseState {
     current_health: i32,
     block: i32,
     statuses: Vec<Status>,
+    modifiers: Vec<Modifier>,
 }
 
 pub trait State {
@@ -41,6 +48,9 @@ pub trait State {
     fn add_status(&mut self, status_type: StatusType, stacks: i32);
     fn set_block(&mut self, amount: i32);
     fn set_health(&mut self, amount: i32);
+    fn has_modifier(&self, modifier: &Modifier) -> bool;
+    fn add_modifier(&mut self, modifier: Modifier);
+    fn remove_modifier(&mut self, modifier: &Modifier);
 }
 
 impl BaseState {
@@ -51,6 +61,7 @@ impl BaseState {
             current_health: max_health,
             block: 0,
             statuses: Vec::new(),
+            modifiers: Vec::new(),
         }
     }
 }
@@ -102,5 +113,19 @@ impl State for BaseState {
     
     fn set_health(&mut self, amount: i32) {
         self.current_health = amount.clamp(0, self.max_health);
+    }
+    
+    fn has_modifier(&self, modifier: &Modifier) -> bool {
+        self.modifiers.contains(modifier)
+    }
+    
+    fn add_modifier(&mut self, modifier: Modifier) {
+        if !self.modifiers.contains(&modifier) {
+            self.modifiers.push(modifier);
+        }
+    }
+    
+    fn remove_modifier(&mut self, modifier: &Modifier) {
+        self.modifiers.retain(|m| m != modifier);
     }
 }

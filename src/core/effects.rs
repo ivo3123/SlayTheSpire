@@ -11,7 +11,7 @@ impl<'a> GameContext<'a> {
         match target {
             EntityId::Player => self.game_state.player.add_status(status, stacks),
             EntityId::Enemy(id) => {
-                if let Some(enemy) = self.game_state.enemies.get_mut(id.0 as usize) {
+                if let Some(enemy) = self.game_state.enemies.get_mut(id) {
                     enemy.add_status(status, stacks);
                 }
             }

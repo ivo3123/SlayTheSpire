@@ -1,7 +1,9 @@
-use crate::core::enemy::BaseEnemy;
+use crate::core::enemy::{BaseEnemy, Enemy};
 use crate::core::base_state::State;
+use crate::core::action::Intent;
+use crate::cards::{DamageEffect, BlockEffect};
 
-/// Simple enemy that attacks for 8 damage every turn
+/// Dragonling enemy - alternates between attacking and defending
 pub struct Dragonling {
     base: BaseEnemy,
 }
@@ -10,6 +12,35 @@ impl Dragonling {
     pub fn new() -> Self {
         Dragonling {
             base: BaseEnemy::new("dragonling".to_string(), "Dragonling".to_string(), 50),
+        }
+    }
+}
+
+impl Enemy for Dragonling {
+    fn get_intent(&self, turn_count: usize) -> Intent {
+        match turn_count % 4 {
+            0 => {
+                let amount = 8;
+                Intent::new(
+                    vec![Box::new(DamageEffect { amount })],
+                    format!("Attack for {}", amount),
+                )
+            },
+            1 => {
+                let amount = 6;
+                Intent::new(
+                    vec![Box::new(BlockEffect { amount })],
+                    format!("Gain {} Block", amount),
+                )
+            },
+            2 | 3 => {
+                let amount = 6;
+                Intent::new(
+                    vec![Box::new(DamageEffect { amount })],
+                    format!("Attack for {}", amount),
+                )
+            },
+            _ => unreachable!(),
         }
     }
 }
@@ -53,5 +84,17 @@ impl State for Dragonling {
     
     fn set_health(&mut self, amount: i32) {
         self.base.set_health(amount)
+    }
+    
+    fn has_modifier(&self, modifier: &crate::core::base_state::Modifier) -> bool {
+        self.base.has_modifier(modifier)
+    }
+    
+    fn add_modifier(&mut self, modifier: crate::core::base_state::Modifier) {
+        self.base.add_modifier(modifier)
+    }
+    
+    fn remove_modifier(&mut self, modifier: &crate::core::base_state::Modifier) {
+        self.base.remove_modifier(modifier)
     }
 }

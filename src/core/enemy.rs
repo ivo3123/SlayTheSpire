@@ -1,4 +1,12 @@
 use crate::core::base_state::{BaseState, State, StatusType, Status};
+use crate::core::action::Intent;
+
+/// Trait for enemies that can select their next action
+pub trait Enemy: State {
+    /// Get the enemy's next intent (action to perform)
+    /// The turn_count can be used for pattern-based enemies
+    fn get_intent(&self, turn_count: usize) -> Intent;
+}
 
 #[derive(Clone, Debug)]
 pub struct BaseEnemy {
@@ -16,6 +24,16 @@ impl BaseEnemy {
     
     pub fn id(&self) -> &str {
         &self.id
+    }
+    
+    /// Default intent - simple attack
+    /// Override this in specific enemy types for more complex behavior
+    pub fn get_intent(&self, _turn_count: usize) -> Intent {
+        use crate::cards::DamageEffect;
+        Intent::new(
+            vec![Box::new(DamageEffect { amount: 6 })],
+            format!("Attack for 6"),
+        )
     }
 }
 
@@ -58,5 +76,17 @@ impl State for BaseEnemy {
     
     fn set_health(&mut self, amount: i32) {
         self.base_state.set_health(amount)
+    }
+    
+    fn has_modifier(&self, modifier: &crate::core::base_state::Modifier) -> bool {
+        self.base_state.has_modifier(modifier)
+    }
+    
+    fn add_modifier(&mut self, modifier: crate::core::base_state::Modifier) {
+        self.base_state.add_modifier(modifier)
+    }
+    
+    fn remove_modifier(&mut self, modifier: &crate::core::base_state::Modifier) {
+        self.base_state.remove_modifier(modifier)
     }
 }
