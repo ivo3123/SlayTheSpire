@@ -39,6 +39,8 @@ pub trait State {
     fn get_status(&self, status_type: &StatusType) -> i32;
     fn get_all_statuses(&self) -> &Vec<Status>;
     fn add_status(&mut self, status_type: StatusType, stacks: i32);
+    fn set_block(&mut self, amount: i32);
+    fn set_health(&mut self, amount: i32);
 }
 
 impl BaseState {
@@ -92,5 +94,13 @@ impl State for BaseState {
         } else {
             self.statuses.push(Status::new(status_type, stacks));
         }
+    }
+    
+    fn set_block(&mut self, amount: i32) {
+        self.block = amount.max(0);
+    }
+    
+    fn set_health(&mut self, amount: i32) {
+        self.current_health = amount.clamp(0, self.max_health);
     }
 }

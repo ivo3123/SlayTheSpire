@@ -29,4 +29,5 @@ pub trait Effect: std::fmt::Debug {
     fn on_event(&mut self, event: &GameEvent, ctx: &mut GameContext);
     fn ui_state(&self) -> EffectUIState;
     fn should_remove(&self) -> bool { false }
+    fn clone_box(&self) -> Box<dyn Effect>;
 }

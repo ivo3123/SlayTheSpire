@@ -1,9 +1,8 @@
 use crate::core::effects::{Effect, EffectUIState, GameContext};
-use crate::core::game_state::{GameEvent, EntityId};
+use crate::core::game_state::{GameEvent};
 use crate::core::base_state::StatusType;
 
-/// Ritual - Gain strength at end of turn
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ritual {
     pub amount: i32,
 }
@@ -23,5 +22,9 @@ impl Effect for Ritual {
             description: format!("At end of turn gain {} Strength", self.amount),
             counters: vec![],
         }
+    }
+    
+    fn clone_box(&self) -> Box<dyn Effect> {
+        Box::new(self.clone())
     }
 }

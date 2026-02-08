@@ -46,4 +46,12 @@ impl State for Dragonling {
     fn add_status(&mut self, status_type: crate::core::base_state::StatusType, stacks: i32) {
         self.base.add_status(status_type, stacks)
     }
+    
+    fn set_block(&mut self, amount: i32) {
+        self.base.set_block(amount)
+    }
+    
+    fn set_health(&mut self, amount: i32) {
+        self.base.set_health(amount)
+    }
 }

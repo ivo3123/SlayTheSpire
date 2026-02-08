@@ -51,4 +51,12 @@ impl State for BaseEnemy {
     fn add_status(&mut self, status_type: StatusType, stacks: i32) {
         self.base_state.add_status(status_type, stacks)
     }
+    
+    fn set_block(&mut self, amount: i32) {
+        self.base_state.set_block(amount)
+    }
+    
+    fn set_health(&mut self, amount: i32) {
+        self.base_state.set_health(amount)
+    }
 }
