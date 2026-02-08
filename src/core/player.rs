@@ -74,8 +74,16 @@ impl State for Player {
         self.base_state.get_all_statuses()
     }
     
+    fn get_all_statuses_mut(&mut self) -> &mut Vec<Status> {
+        self.base_state.get_all_statuses_mut()
+    }
+    
     fn add_status(&mut self, status_type: StatusType, stacks: i32) {
         self.base_state.add_status(status_type, stacks)
+    }
+    
+    fn reduce_status(&mut self, status_type: StatusType, amount: i32) {
+        self.base_state.reduce_status(status_type, amount)
     }
     
     fn set_block(&mut self, amount: i32) {
@@ -96,5 +104,13 @@ impl State for Player {
     
     fn remove_modifier(&mut self, modifier: &crate::core::base_state::Modifier) {
         self.base_state.remove_modifier(modifier)
+    }
+    
+    fn remove_expired_statuses(&mut self) {
+        self.base_state.remove_expired_statuses()
+    }
+    
+    fn decay_debuffs(&mut self) {
+        self.base_state.decay_debuffs()
     }
 }

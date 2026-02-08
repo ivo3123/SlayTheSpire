@@ -74,8 +74,16 @@ impl State for Dragonling {
         self.base.get_all_statuses()
     }
     
+    fn get_all_statuses_mut(&mut self) -> &mut Vec<crate::core::base_state::Status> {
+        self.base.get_all_statuses_mut()
+    }
+    
     fn add_status(&mut self, status_type: crate::core::base_state::StatusType, stacks: i32) {
         self.base.add_status(status_type, stacks)
+    }
+    
+    fn reduce_status(&mut self, status_type: crate::core::base_state::StatusType, amount: i32) {
+        self.base.reduce_status(status_type, amount)
     }
     
     fn set_block(&mut self, amount: i32) {
@@ -96,5 +104,13 @@ impl State for Dragonling {
     
     fn remove_modifier(&mut self, modifier: &crate::core::base_state::Modifier) {
         self.base.remove_modifier(modifier)
+    }
+    
+    fn remove_expired_statuses(&mut self) {
+        self.base.remove_expired_statuses()
+    }
+    
+    fn decay_debuffs(&mut self) {
+        self.base.decay_debuffs()
     }
 }

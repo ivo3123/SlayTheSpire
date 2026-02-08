@@ -45,12 +45,16 @@ pub trait State {
     fn is_alive(&self) -> bool;
     fn get_status(&self, status_type: &StatusType) -> i32;
     fn get_all_statuses(&self) -> &Vec<Status>;
+    fn get_all_statuses_mut(&mut self) -> &mut Vec<Status>;
     fn add_status(&mut self, status_type: StatusType, stacks: i32);
+    fn reduce_status(&mut self, status_type: StatusType, amount: i32);
     fn set_block(&mut self, amount: i32);
     fn set_health(&mut self, amount: i32);
     fn has_modifier(&self, modifier: &Modifier) -> bool;
     fn add_modifier(&mut self, modifier: Modifier);
     fn remove_modifier(&mut self, modifier: &Modifier);
+    fn remove_expired_statuses(&mut self);
+    fn decay_debuffs(&mut self);
 }
 
 impl BaseState {
@@ -99,12 +103,23 @@ impl State for BaseState {
         &self.statuses
     }
     
+    fn get_all_statuses_mut(&mut self) -> &mut Vec<Status> {
+        &mut self.statuses
+    }
+    
     fn add_status(&mut self, status_type: StatusType, stacks: i32) {
         if let Some(status) = self.statuses.iter_mut().find(|s| s.status_type == status_type) {
             status.stacks += stacks;
         } else {
             self.statuses.push(Status::new(status_type, stacks));
         }
+    }
+    
+    fn reduce_status(&mut self, status_type: StatusType, amount: i32) {
+        if let Some(status) = self.statuses.iter_mut().find(|s| s.status_type == status_type) {
+            status.stacks -= amount;
+        }
+        self.remove_expired_statuses();
     }
     
     fn set_block(&mut self, amount: i32) {
@@ -127,5 +142,23 @@ impl State for BaseState {
     
     fn remove_modifier(&mut self, modifier: &Modifier) {
         self.modifiers.retain(|m| m != modifier);
+    }
+    
+    fn remove_expired_statuses(&mut self) {
+        // Remove statuses with 0 or negative stacks
+        self.statuses.retain(|s| s.stacks > 0);
+    }
+    
+    fn decay_debuffs(&mut self) {
+        // Decrement temporary debuffs
+        for status in &mut self.statuses {
+            match status.status_type {
+                StatusType::Vulnerable | StatusType::Weak | StatusType::Frail => {
+                    status.stacks -= 1;
+                }
+                _ => {} // Strength, Dexterity, Poison don't auto-decay
+            }
+        }
+        self.remove_expired_statuses();
     }
 }

@@ -140,7 +140,6 @@ impl GameState {
     ) {
         let mut dmg = base_damage;
         
-        // 1. Attacker modifiers
         let strength = self.get_status(source, StatusType::Strength);
         dmg += strength;
         
@@ -149,7 +148,6 @@ impl GameState {
             dmg = (dmg as f32 * 0.75).floor() as i32;
         }
         
-        // 2. Target modifiers
         let vulnerable = self.get_status(target, StatusType::Vulnerable);
         if vulnerable > 0 {
             dmg = (dmg as f32 * 1.5).floor() as i32;
@@ -157,7 +155,6 @@ impl GameState {
         
         dmg = dmg.max(0);
         
-        // 3. Apply block
         let block = self.get_block(target);
         let absorbed = dmg.min(block);
         let final_damage = dmg - absorbed;
@@ -165,7 +162,6 @@ impl GameState {
         self.modify_block(target, -absorbed);
         self.modify_hp(target, -final_damage);
         
-        // 4. Fire event
         self.fire_event(GameEvent::DamageDealt {
             source,
             target,
@@ -177,11 +173,9 @@ impl GameState {
     pub fn gain_block(&mut self, entity: EntityId, base_block: i32) {
         let mut block = base_block;
         
-        // 1. Apply Dexterity
         let dexterity = self.get_status(entity, StatusType::Dexterity);
         block += dexterity;
         
-        // 2. Apply Frail (reduces block gain)
         let frail = self.get_status(entity, StatusType::Frail);
         if frail > 0 {
             block = (block as f32 * 0.75).floor() as i32;
@@ -191,7 +185,6 @@ impl GameState {
         
         self.modify_block(entity, block);
         
-        // 3. Fire event
         self.fire_event(GameEvent::BlockGained {
             entity,
             amount: block,
@@ -199,7 +192,6 @@ impl GameState {
     }
     
     pub fn play_card(&mut self, card: &Card, source: EntityId, target: Option<EntityId>) -> Result<(), String> {
-        // Check if player has enough energy
         if let EntityId::Player = source {
             if self.player.get_energy() < card.cost() {
                 return Err(format!("Not enough energy: need {}, have {}", card.cost(), self.player.get_energy()));
@@ -289,32 +281,70 @@ impl GameState {
     }
     
     pub fn start_player_turn(&mut self) {
-        // Remove block from previous turn (unless Barricade is active)
+        self.apply_poison(EntityId::Player);
+        self.player.decay_debuffs();
+        
         if !self.player.has_modifier(&Modifier::RetainBlock) {
             self.player.set_block(0);
         }
         
-        // Refill energy
         self.player.refill_energy();
         
-        // Draw cards
-        self.draw_cards(5);
+        let default_card_drawn_at_start_of_turn = 5;
+        self.draw_cards(default_card_drawn_at_start_of_turn);
         
-        // Fire event
         self.fire_event(GameEvent::TurnStarted { entity: EntityId::Player });
     }
     
+    pub fn process_enemy_turn_start(&mut self, enemy_id: usize) {
+        self.apply_poison(EntityId::Enemy(enemy_id));
+        
+        if let Some(enemy) = self.enemies.get_mut(enemy_id) {
+            if !enemy.has_modifier(&Modifier::RetainBlock) {
+                enemy.set_block(0);
+            }
+        }
+    }
+    
+    pub fn process_enemy_turn_end(&mut self, enemy_id: usize) {
+        if let Some(enemy) = self.enemies.get_mut(enemy_id) {
+            enemy.decay_debuffs();
+        }
+    }
+    
+    fn apply_poison(&mut self, entity: EntityId) {
+        let poison = self.get_status(entity, StatusType::Poison);
+        if poison > 0 {
+            self.modify_hp(entity, -poison);
+            
+            match entity {
+                EntityId::Player => {
+                    self.player.reduce_status(StatusType::Poison, 1);
+                }
+                EntityId::Enemy(id) => {
+                    if let Some(enemy) = self.enemies.get_mut(id) {
+                        enemy.reduce_status(StatusType::Poison, 1);
+                    }
+                }
+            }
+        }
+    }
+    
     pub fn end_player_turn(&mut self) {
-        // Fire turn ended event (for effects like Ritual)
         self.fire_event(GameEvent::TurnEnded { entity: EntityId::Player });
         
-        // Discard hand unless player has RetainHand modifier (e.g., from a relic)
         if !self.player.has_modifier(&Modifier::RetainHand) {
             self.discard_hand();
         }
         
-        // Increment turn counter
         self.turn_count += 1;
+    }
+    
+    pub fn start_enemy_phase(&mut self) {
+        let enemy_count = self.enemies.len();
+        for enemy_id in 0..enemy_count {
+            self.process_enemy_turn_start(enemy_id);
+        }
     }
     
     pub fn get_turn_count(&self) -> usize {
