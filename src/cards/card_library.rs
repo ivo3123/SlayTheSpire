@@ -69,9 +69,9 @@ pub struct AddModifierAction {
 impl Action for AddModifierAction {
     fn resolve(&self, game_state: &mut GameState, source: EntityId, _target: Option<EntityId>) {
         match source {
-            EntityId::Player => game_state.player.add_modifier(self.modifier.clone()),
+            EntityId::Player => game_state.player_mut().add_modifier(self.modifier.clone()),
             EntityId::Enemy(id) => {
-                if let Some(enemy) = game_state.enemies.get_mut(id) {
+                if let Some(enemy) = game_state.enemies_mut().get_mut(id) {
                     enemy.add_modifier(self.modifier.clone());
                 }
             }

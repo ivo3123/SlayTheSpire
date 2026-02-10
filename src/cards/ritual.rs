@@ -1,6 +1,6 @@
-use crate::core::effects::{Effect, EffectUIState, GameContext};
-use crate::core::game_state::{GameEvent};
-use crate::core::base_state::StatusType;
+use crate::core::effects::{Effect, EffectUIState};
+use crate::core::game_state::{GameEvent, GameState, EntityId};
+use crate::core::base_state::{StatusType, State};
 
 #[derive(Debug, Clone)]
 pub struct Ritual {
@@ -8,10 +8,17 @@ pub struct Ritual {
 }
 
 impl Effect for Ritual {
-    fn on_event(&mut self, event: &GameEvent, ctx: &mut GameContext) {
+    fn on_event(&mut self, event: &GameEvent, owner: EntityId, game_state: &mut GameState) {
         if let GameEvent::TurnEnded { entity } = event {
-            if *entity == ctx.owner {
-                ctx.add_status(ctx.owner, StatusType::Strength, self.amount);
+            if *entity == owner {
+                match owner {
+                    EntityId::Player => game_state.player_mut().add_status(StatusType::Strength, self.amount),
+                    EntityId::Enemy(id) => {
+                        if let Some(enemy) = game_state.enemies_mut().get_mut(id) {
+                            enemy.add_status(StatusType::Strength, self.amount);
+                        }
+                    }
+                }
             }
         }
     }

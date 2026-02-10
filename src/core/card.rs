@@ -76,7 +76,3 @@ impl Card {
         &self.description
     }
 }
-
-pub struct Deck {
-    cards: Vec<Card>,
-}

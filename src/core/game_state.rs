@@ -2,7 +2,6 @@ use crate::core::{Player, card::Card};
 use crate::core::base_state::{StatusType, Modifier, State};
 use crate::core::enemy::Enemy;
 use crate::core::action::Intent;
-use std::collections::HashMap;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
@@ -22,18 +21,35 @@ pub enum GameEvent {
     BlockGained { entity: EntityId, amount: i32 },
 }
 
+#[derive(Clone, Debug)]
+pub struct TurnRecord {
+    pub turn_number: usize,
+    pub cards_played: Vec<u32>,
+    pub enemy_intents: Vec<(usize, String)>,
+}
+
+impl TurnRecord {
+    fn new(turn_number: usize) -> Self {
+        TurnRecord {
+            turn_number,
+            cards_played: Vec::new(),
+            enemy_intents: Vec::new(),
+        }
+    }
+}
+
 pub struct GameState {
-    pub player: Player,
-    pub enemies: Vec<Box<dyn Enemy>>,
-    pub effects: Vec<(EntityId, Box<dyn crate::core::effects::Effect>)>,
+    player: Player,
+    enemies: Vec<Box<dyn Enemy>>,
+    effects: Vec<(EntityId, Box<dyn crate::core::effects::Effect>)>,
     
-    // Deck management
-    pub draw_pile: Vec<Card>,
-    pub hand: Vec<Card>,
-    pub discard_pile: Vec<Card>,
-    pub exhaust_pile: Vec<Card>,
+    draw_pile: Vec<Card>,
+    hand: Vec<Card>,
+    discard_pile: Vec<Card>,
+    exhaust_pile: Vec<Card>,
     
-    card_registry: HashMap<u32, Card>,
+    turn_history: Vec<TurnRecord>,
+    current_turn_record: TurnRecord,
     turn_count: usize,
 }
 
@@ -47,9 +63,66 @@ impl GameState {
             hand: Vec::new(),
             discard_pile: Vec::new(),
             exhaust_pile: Vec::new(),
-            card_registry: HashMap::new(),
+            turn_history: Vec::new(),
+            current_turn_record: TurnRecord::new(0),
             turn_count: 0,
         }
+    }
+    
+    // Getters за достъп до полета
+    pub fn player(&self) -> &Player {
+        &self.player
+    }
+    
+    pub fn player_mut(&mut self) -> &mut Player {
+        &mut self.player
+    }
+    
+    pub fn enemies(&self) -> &[Box<dyn Enemy>] {
+        &self.enemies
+    }
+    
+    pub fn enemies_mut(&mut self) -> &mut Vec<Box<dyn Enemy>> {
+        &mut self.enemies
+    }
+    
+    pub fn draw_pile(&self) -> &[Card] {
+        &self.draw_pile
+    }
+    
+    pub fn hand(&self) -> &[Card] {
+        &self.hand
+    }
+    
+    pub fn discard_pile(&self) -> &[Card] {
+        &self.discard_pile
+    }
+    
+    pub fn exhaust_pile(&self) -> &[Card] {
+        &self.exhaust_pile
+    }
+    
+    pub fn turn_history(&self) -> &[TurnRecord] {
+        &self.turn_history
+    }
+    
+    pub fn current_turn_record(&self) -> &TurnRecord {
+        &self.current_turn_record
+    }
+    
+    /// Връща броя карти, играни през текущия ход
+    pub fn cards_played_this_turn(&self) -> usize {
+        self.current_turn_record.cards_played.len()
+    }
+    
+    /// Проверява дали дадена карта е първата, играна този ход
+    pub fn is_first_card_this_turn(&self) -> bool {
+        self.current_turn_record.cards_played.is_empty()
+    }
+    
+    /// Записва интенцията на враг за текущия ход
+    pub fn record_enemy_intent(&mut self, enemy_id: usize, intent_description: String) {
+        self.current_turn_record.enemy_intents.push((enemy_id, intent_description));
     }
     
     pub fn new_with_deck(player: Player, enemies: Vec<Box<dyn Enemy>>, starting_deck: Vec<Card>) -> Self {
@@ -67,11 +140,7 @@ impl GameState {
         let mut effects = std::mem::take(&mut self.effects);
         
         for (owner, effect) in effects.iter_mut() {
-            let mut ctx = crate::core::effects::GameContext {
-                owner: *owner,
-                game_state: self,
-            };
-            effect.on_event(&event, &mut ctx);
+            effect.on_event(&event, *owner, self);
         }
         
         effects.retain(|(_, e)| !e.should_remove());
@@ -197,6 +266,8 @@ impl GameState {
                 return Err(format!("Not enough energy: need {}, have {}", card.cost(), self.player.get_energy()));
             }
             self.player.spend_energy(card.cost());
+            
+            self.current_turn_record.cards_played.push(card.instance_id());
         }
         
         for effect in card.effects() {
@@ -217,7 +288,6 @@ impl GameState {
     }
     
     pub fn draw_card(&mut self) -> Option<Card> {
-        // shuffle discard back into draw pile
         if self.draw_pile.is_empty() && !self.discard_pile.is_empty() {
             self.draw_pile.append(&mut self.discard_pile);
             self.shuffle_draw_pile();
@@ -242,6 +312,21 @@ impl GameState {
         } else {
             None
         }
+    }
+    
+    pub fn remove_from_hand(&mut self, index: usize) -> Option<Card> {
+        if index < self.hand.len() {
+            Some(self.hand.remove(index))
+        } else {
+            None
+        }
+    }
+    
+    pub fn find_in_hand<F>(&self, predicate: F) -> Option<usize>
+    where
+        F: Fn(&Card) -> bool,
+    {
+        self.hand.iter().position(predicate)
     }
     
     pub fn discard_hand(&mut self) {
@@ -281,6 +366,12 @@ impl GameState {
     }
     
     pub fn start_player_turn(&mut self) {
+        if self.current_turn_record.turn_number > 0 || !self.current_turn_record.cards_played.is_empty() {
+            self.turn_history.push(self.current_turn_record.clone());
+        }
+        
+        self.current_turn_record = TurnRecord::new(self.turn_count);
+        
         self.apply_poison(EntityId::Player);
         self.player.decay_debuffs();
         

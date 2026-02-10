@@ -1,10 +1,7 @@
 use crate::core::base_state::{BaseState, State, StatusType, Status};
 use crate::core::action::Intent;
 
-/// Trait for enemies that can select their next action
 pub trait Enemy: State {
-    /// Get the enemy's next intent (action to perform)
-    /// The turn_count can be used for pattern-based enemies
     fn get_intent(&self, turn_count: usize) -> Intent;
 }
 
@@ -24,16 +21,6 @@ impl BaseEnemy {
     
     pub fn id(&self) -> &str {
         &self.id
-    }
-    
-    /// Default intent - simple attack
-    /// Override this in specific enemy types for more complex behavior
-    pub fn get_intent(&self, _turn_count: usize) -> Intent {
-        use crate::cards::DamageEffect;
-        Intent::new(
-            vec![Box::new(DamageEffect { amount: 6 })],
-            format!("Attack for 6"),
-        )
     }
 }
 
