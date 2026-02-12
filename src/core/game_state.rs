@@ -85,6 +85,21 @@ impl GameState {
         &mut self.enemies
     }
     
+    pub fn get_all_living_enemies(&self) -> Vec<EntityId> {
+        self.enemies
+            .iter()
+            .enumerate()
+            .filter(|(_, enemy)| enemy.is_alive())
+            .map(|(id, _)| EntityId::Enemy(id))
+            .collect()
+    }
+    
+    pub fn get_all_enemy_ids(&self) -> Vec<EntityId> {
+        (0..self.enemies.len())
+            .map(|id| EntityId::Enemy(id))
+            .collect()
+    }
+    
     pub fn draw_pile(&self) -> &[Card] {
         &self.draw_pile
     }
@@ -231,7 +246,6 @@ impl GameState {
             source,
             target,
             amount: final_damage,
-            // unblocked_damage_taken: ...
         });
     }
     
@@ -256,33 +270,73 @@ impl GameState {
         });
     }
     
-    pub fn play_card(&mut self, card: &Card, source: EntityId, targets: &[EntityId]) -> Result<(), String> {
-        if let EntityId::Player = source {
+    pub fn play_card(&mut self, hand_index: usize, target: Option<EntityId>) -> Result<(), String> {
+        if hand_index >= self.hand.len() {
+            return Err("Card index out of bounds".to_string());
+        }
+        
+        let card = &self.hand[hand_index];
+        let targeting = card.targeting();
+        
+        use crate::core::card::CardTargeting;
+        
+        let actual_targets: Vec<EntityId> = match targeting {
+            CardTargeting::SingleEnemy => {
+                match target {
+                    Some(EntityId::Enemy(id)) => {
+                        if id >= self.enemies.len() || self.enemies[id].get_current_health() == 0 {
+                            return Err("Invalid enemy target".to_string());
+                        }
+                        vec![EntityId::Enemy(id)]
+                    }
+                    _ => return Err("This card requires a single enemy target".to_string()),
+                }
+            }
+            CardTargeting::AllEnemies => {
+                self.get_all_living_enemies()
+            }
+            CardTargeting::Self_ => {
+                vec![EntityId::Player]
+            }
+            CardTargeting::None => {
+                vec![]
+            }
+        };
+        
+        let energy_spent = if let EntityId::Player = EntityId::Player {
             match card.get_current_cost() {
                 Ok(Some(cost)) => {
                     if self.player.get_energy() < cost {
                         return Err(format!("Not enough energy: need {}, have {}", cost, self.player.get_energy()));
                     }
                     self.player.spend_energy(cost);
+                    None
                 }
                 Ok(None) => {
                     let energy = self.player.get_energy();
                     self.player.spend_energy(energy);
+                    Some(energy)
                 }
                 Err(e) => return Err(e),
             }
-            
-            self.current_turn_record.cards_played.push(card.instance_id());
-        }
+        } else {
+            None
+        };
+        
+        let card = self.remove_from_hand(hand_index).unwrap();
+        
+        self.current_turn_record.cards_played.push(card.instance_id());
         
         for effect in card.effects() {
-            effect.resolve(self, source, targets);
+            effect.resolve(self, EntityId::Player, &actual_targets, energy_spent);
         }
 
         self.fire_event(GameEvent::CardPlayed {
             card: card.instance_id(),
-            source,
+            source: EntityId::Player,
         });
+        
+        self.add_card_to_discard(card);
         
         Ok(())
     }
@@ -363,11 +417,32 @@ impl GameState {
     pub fn execute_enemy_intent(&mut self, enemy_id: usize, intent: &Intent, targets: &[EntityId]) {
         let source = EntityId::Enemy(enemy_id);
         
-        intent.execute(self, source, targets);
+        intent.execute(self, source, targets, None);
 
         self.fire_event(GameEvent::EnemyAction {
             enemy: source,
         });
+    }
+    
+    pub fn execute_all_enemy_turns(&mut self) {
+        let enemy_count = self.enemies.len();
+        
+        for enemy_id in 0..enemy_count {
+            if !self.enemies[enemy_id].is_alive() {
+                continue;
+            }
+            
+            self.process_enemy_turn_start(enemy_id);
+            
+            let intent = self.enemies[enemy_id].get_intent(self.turn_count);
+            let intent_desc = intent.description().to_string();
+            
+            self.record_enemy_intent(enemy_id, intent_desc);
+            
+            self.execute_enemy_intent(enemy_id, &intent, &[EntityId::Player]);
+            
+            self.process_enemy_turn_end(enemy_id);
+        }
     }
     
     pub fn start_player_turn(&mut self) {
@@ -446,4 +521,25 @@ impl GameState {
     pub fn get_turn_count(&self) -> usize {
         self.turn_count
     }
+    
+    pub fn is_player_dead(&self) -> bool {
+        !self.player.is_alive()
+    }
+    
+    pub fn are_all_enemies_dead(&self) -> bool {
+        self.enemies.iter().all(|e| !e.is_alive())
+    }
+    
+    pub fn is_combat_over(&self) -> bool {
+        self.is_player_dead() || self.are_all_enemies_dead()
+    }
+    
+    pub fn living_enemy_count(&self) -> usize {
+        self.enemies.iter().filter(|e| e.is_alive()).count()
+    }
+    
+    pub fn remove_dead_enemies(&mut self) {
+        self.enemies.retain(|enemy| enemy.is_alive());
+    }
 }
+

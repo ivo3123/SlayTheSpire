@@ -1,4 +1,5 @@
 use crate::core::card::{Card, CardType, Cost};
+use crate::core::card::CardTargeting;
 use crate::core::action::Action;
 use crate::core::game_state::{GameState, EntityId};
 use crate::core::effects::Effect;
@@ -10,9 +11,11 @@ pub struct DamageEffect {
 }
 
 impl Action for DamageEffect {
-    fn resolve(&self, game_state: &mut GameState, source: EntityId, targets: &[EntityId]) {
+    fn resolve(&self, game_state: &mut GameState, source: EntityId, targets: &[EntityId], energy_spent: Option<i32>) {
+        let damage = energy_spent.unwrap_or(self.amount);
+        
         for &target_id in targets {
-            game_state.deal_damage(source, target_id, self.amount);
+            game_state.deal_damage(source, target_id, damage);
         }
     }
     
@@ -31,8 +34,9 @@ pub struct BlockEffect {
 }
 
 impl Action for BlockEffect {
-    fn resolve(&self, game_state: &mut GameState, source: EntityId, _targets: &[EntityId]) {
-        game_state.gain_block(source, self.amount);
+    fn resolve(&self, game_state: &mut GameState, source: EntityId, _targets: &[EntityId], energy_spent: Option<i32>) {
+        let block = energy_spent.unwrap_or(self.amount);
+        game_state.gain_block(source, block);
     }
     
     fn description(&self) -> String {
@@ -67,7 +71,7 @@ pub struct AddModifierAction {
 }
 
 impl Action for AddModifierAction {
-    fn resolve(&self, game_state: &mut GameState, source: EntityId, _targets: &[EntityId]) {
+    fn resolve(&self, game_state: &mut GameState, source: EntityId, _targets: &[EntityId], _energy_spent: Option<i32>) {
         match source {
             EntityId::Player => game_state.player_mut().add_modifier(self.modifier.clone()),
             EntityId::Enemy(id) => {
@@ -91,7 +95,7 @@ impl Action for AddModifierAction {
 }
 
 impl Action for ApplyEffect {
-    fn resolve(&self, game_state: &mut GameState, source: EntityId, _targets: &[EntityId]) {
+    fn resolve(&self, game_state: &mut GameState, source: EntityId, _targets: &[EntityId], _energy_spent: Option<i32>) {
         game_state.add_effect(source, self.effect.clone_box());
     }
     
@@ -111,6 +115,7 @@ pub fn strike(instance_id: u32) -> Card {
         "Strike".to_string(),
         Cost::Fixed(1),
         CardType::Attack,
+        CardTargeting::SingleEnemy,
         vec![Box::new(DamageEffect { amount: 6 })],
         "Deal 6 damage.".to_string(),
     )
@@ -123,6 +128,7 @@ pub fn defend(instance_id: u32) -> Card {
         "Defend".to_string(),
         Cost::Fixed(1),
         CardType::Skill,
+        CardTargeting::Self_,
         vec![Box::new(BlockEffect { amount: 5 })],
         "Gain 5 Block.".to_string(),
     )
@@ -137,6 +143,7 @@ pub fn inflame(instance_id: u32) -> Card {
         "Inflame".to_string(),
         Cost::Fixed(1),
         CardType::Power,
+        CardTargeting::Self_,
         vec![Box::new(ApplyEffect {
             effect: Box::new(Ritual { amount: 2 }),
         })],
@@ -151,6 +158,7 @@ pub fn barricade(instance_id: u32) -> Card {
         "Barricade".to_string(),
         Cost::Fixed(3),
         CardType::Power,
+        CardTargeting::None,
         vec![Box::new(AddModifierAction {
             modifier: Modifier::RetainBlock,
         })],

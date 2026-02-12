@@ -7,6 +7,14 @@ pub enum CardType {
     Power,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum CardTargeting {
+    SingleEnemy,
+    AllEnemies,
+    Self_,
+    None,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Cost {
     Fixed(i32),
@@ -23,6 +31,7 @@ pub struct Card {
     base_cost: Cost,
     cost_reduction: i32,
     card_type: CardType,
+    targeting: CardTargeting,
     effects: Vec<Box<dyn Action>>,
     description: String,
 }
@@ -36,6 +45,7 @@ impl Clone for Card {
             base_cost: self.base_cost.clone(),
             cost_reduction: self.cost_reduction,
             card_type: self.card_type,
+            targeting: self.targeting,
             effects: self.effects.iter().map(|e| e.clone_box()).collect(),
             description: self.description.clone(),
         }
@@ -49,6 +59,7 @@ impl Card {
         name: String,
         base_cost: Cost,
         card_type: CardType,
+        targeting: CardTargeting,
         effects: Vec<Box<dyn Action>>,
         description: String,
     ) -> Self {
@@ -59,6 +70,7 @@ impl Card {
             base_cost,
             cost_reduction: 0,
             card_type,
+            targeting,
             effects,
             description,
         }
@@ -106,6 +118,10 @@ impl Card {
     
     pub fn card_type(&self) -> &CardType {
         &self.card_type
+    }
+    
+    pub fn targeting(&self) -> CardTargeting {
+        self.targeting
     }
     
     pub fn effects(&self) -> &Vec<Box<dyn Action>> {
