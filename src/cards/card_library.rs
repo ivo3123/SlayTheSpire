@@ -1,4 +1,4 @@
-use crate::core::card::{Card, CardType};
+use crate::core::card::{Card, CardType, Cost};
 use crate::core::action::Action;
 use crate::core::game_state::{GameState, EntityId};
 use crate::core::effects::Effect;
@@ -10,8 +10,8 @@ pub struct DamageEffect {
 }
 
 impl Action for DamageEffect {
-    fn resolve(&self, game_state: &mut GameState, source: EntityId, target: Option<EntityId>) {
-        if let Some(target_id) = target {
+    fn resolve(&self, game_state: &mut GameState, source: EntityId, targets: &[EntityId]) {
+        for &target_id in targets {
             game_state.deal_damage(source, target_id, self.amount);
         }
     }
@@ -31,7 +31,7 @@ pub struct BlockEffect {
 }
 
 impl Action for BlockEffect {
-    fn resolve(&self, game_state: &mut GameState, source: EntityId, _target: Option<EntityId>) {
+    fn resolve(&self, game_state: &mut GameState, source: EntityId, _targets: &[EntityId]) {
         game_state.gain_block(source, self.amount);
     }
     
@@ -67,7 +67,7 @@ pub struct AddModifierAction {
 }
 
 impl Action for AddModifierAction {
-    fn resolve(&self, game_state: &mut GameState, source: EntityId, _target: Option<EntityId>) {
+    fn resolve(&self, game_state: &mut GameState, source: EntityId, _targets: &[EntityId]) {
         match source {
             EntityId::Player => game_state.player_mut().add_modifier(self.modifier.clone()),
             EntityId::Enemy(id) => {
@@ -91,7 +91,7 @@ impl Action for AddModifierAction {
 }
 
 impl Action for ApplyEffect {
-    fn resolve(&self, game_state: &mut GameState, source: EntityId, _target: Option<EntityId>) {
+    fn resolve(&self, game_state: &mut GameState, source: EntityId, _targets: &[EntityId]) {
         game_state.add_effect(source, self.effect.clone_box());
     }
     
@@ -109,7 +109,7 @@ pub fn strike(instance_id: u32) -> Card {
         instance_id,
         "strike".to_string(),
         "Strike".to_string(),
-        1,
+        Cost::Fixed(1),
         CardType::Attack,
         vec![Box::new(DamageEffect { amount: 6 })],
         "Deal 6 damage.".to_string(),
@@ -121,7 +121,7 @@ pub fn defend(instance_id: u32) -> Card {
         instance_id,
         "defend".to_string(),
         "Defend".to_string(),
-        1,
+        Cost::Fixed(1),
         CardType::Skill,
         vec![Box::new(BlockEffect { amount: 5 })],
         "Gain 5 Block.".to_string(),
@@ -135,7 +135,7 @@ pub fn inflame(instance_id: u32) -> Card {
         instance_id,
         "inflame".to_string(),
         "Inflame".to_string(),
-        1,
+        Cost::Fixed(1),
         CardType::Power,
         vec![Box::new(ApplyEffect {
             effect: Box::new(Ritual { amount: 2 }),
@@ -149,7 +149,7 @@ pub fn barricade(instance_id: u32) -> Card {
         instance_id,
         "barricade".to_string(),
         "Barricade".to_string(),
-        3,
+        Cost::Fixed(3),
         CardType::Power,
         vec![Box::new(AddModifierAction {
             modifier: Modifier::RetainBlock,

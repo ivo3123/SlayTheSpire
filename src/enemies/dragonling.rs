@@ -3,7 +3,6 @@ use crate::core::base_state::State;
 use crate::core::action::Intent;
 use crate::cards::{DamageEffect, BlockEffect};
 
-/// Dragonling enemy - alternates between attacking and defending
 pub struct Dragonling {
     base: BaseEnemy,
 }

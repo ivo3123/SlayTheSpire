@@ -7,12 +7,21 @@ pub enum CardType {
     Power,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum Cost {
+    Fixed(i32),
+    X,  // remaining energy when played
+    Free,
+    Unplayable,
+}
+
 #[derive(Debug)]
 pub struct Card {
     instance_id: u32,
     id: String,
     name: String,
-    cost: i32,
+    base_cost: Cost,
+    cost_reduction: i32,
     card_type: CardType,
     effects: Vec<Box<dyn Action>>,
     description: String,
@@ -24,7 +33,8 @@ impl Clone for Card {
             instance_id: self.instance_id,
             id: self.id.clone(),
             name: self.name.clone(),
-            cost: self.cost,
+            base_cost: self.base_cost.clone(),
+            cost_reduction: self.cost_reduction,
             card_type: self.card_type,
             effects: self.effects.iter().map(|e| e.clone_box()).collect(),
             description: self.description.clone(),
@@ -37,7 +47,7 @@ impl Card {
         instance_id: u32,
         id: String,
         name: String,
-        cost: i32,
+        base_cost: Cost,
         card_type: CardType,
         effects: Vec<Box<dyn Action>>,
         description: String,
@@ -46,7 +56,8 @@ impl Card {
             instance_id,
             id,
             name,
-            cost,
+            base_cost,
+            cost_reduction: 0,
             card_type,
             effects,
             description,
@@ -60,18 +71,47 @@ impl Card {
     pub fn id(&self) -> &str {
         &self.id
     }
+    
     pub fn name(&self) -> &str {
         &self.name
     }
-    pub fn cost(&self) -> i32 {
-        self.cost
+    
+    pub fn base_cost(&self) -> &Cost {
+        &self.base_cost
     }
+    
+    pub fn get_current_cost(&self) -> Result<Option<i32>, String> {
+        match &self.base_cost {
+            Cost::Fixed(base) => {
+                let cost = (*base - self.cost_reduction).max(0);
+                Ok(Some(cost))
+            }
+            Cost::X => Ok(None),
+            Cost::Free => Ok(Some(0)),
+            Cost::Unplayable => Err("Card is unplayable".to_string()),
+        }
+    }
+    
+    pub fn reduce_cost(&mut self, amount: i32) {
+        self.cost_reduction += amount;
+    }
+    
+    pub fn reset_cost_reduction(&mut self) {
+        self.cost_reduction = 0;
+    }
+    
+    pub fn cost_reduction(&self) -> i32 {
+        self.cost_reduction
+    }
+    
     pub fn card_type(&self) -> &CardType {
         &self.card_type
     }
+    
     pub fn effects(&self) -> &Vec<Box<dyn Action>> {
         &self.effects
     }
+    
     pub fn description(&self) -> &str {
         &self.description
     }

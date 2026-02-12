@@ -69,7 +69,6 @@ impl GameState {
         }
     }
     
-    // Getters за достъп до полета
     pub fn player(&self) -> &Player {
         &self.player
     }
@@ -110,17 +109,14 @@ impl GameState {
         &self.current_turn_record
     }
     
-    /// Връща броя карти, играни през текущия ход
     pub fn cards_played_this_turn(&self) -> usize {
         self.current_turn_record.cards_played.len()
     }
     
-    /// Проверява дали дадена карта е първата, играна този ход
     pub fn is_first_card_this_turn(&self) -> bool {
         self.current_turn_record.cards_played.is_empty()
     }
     
-    /// Записва интенцията на враг за текущия ход
     pub fn record_enemy_intent(&mut self, enemy_id: usize, intent_description: String) {
         self.current_turn_record.enemy_intents.push((enemy_id, intent_description));
     }
@@ -260,18 +256,27 @@ impl GameState {
         });
     }
     
-    pub fn play_card(&mut self, card: &Card, source: EntityId, target: Option<EntityId>) -> Result<(), String> {
+    pub fn play_card(&mut self, card: &Card, source: EntityId, targets: &[EntityId]) -> Result<(), String> {
         if let EntityId::Player = source {
-            if self.player.get_energy() < card.cost() {
-                return Err(format!("Not enough energy: need {}, have {}", card.cost(), self.player.get_energy()));
+            match card.get_current_cost() {
+                Ok(Some(cost)) => {
+                    if self.player.get_energy() < cost {
+                        return Err(format!("Not enough energy: need {}, have {}", cost, self.player.get_energy()));
+                    }
+                    self.player.spend_energy(cost);
+                }
+                Ok(None) => {
+                    let energy = self.player.get_energy();
+                    self.player.spend_energy(energy);
+                }
+                Err(e) => return Err(e),
             }
-            self.player.spend_energy(card.cost());
             
             self.current_turn_record.cards_played.push(card.instance_id());
         }
         
         for effect in card.effects() {
-            effect.resolve(self, source, target);
+            effect.resolve(self, source, targets);
         }
 
         self.fire_event(GameEvent::CardPlayed {
@@ -355,10 +360,10 @@ impl GameState {
         self.draw_pile.push(card);
     }
     
-    pub fn execute_enemy_intent(&mut self, enemy_id: usize, intent: &Intent, target: Option<EntityId>) {
+    pub fn execute_enemy_intent(&mut self, enemy_id: usize, intent: &Intent, targets: &[EntityId]) {
         let source = EntityId::Enemy(enemy_id);
         
-        intent.execute(self, source, target);
+        intent.execute(self, source, targets);
 
         self.fire_event(GameEvent::EnemyAction {
             enemy: source,

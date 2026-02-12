@@ -1,7 +1,7 @@
 use crate::core::game_state::{GameState, EntityId};
 
 pub trait Action: std::fmt::Debug {
-    fn resolve(&self, game_state: &mut GameState, source: EntityId, target: Option<EntityId>);
+    fn resolve(&self, game_state: &mut GameState, source: EntityId, targets: &[EntityId]);
     fn description(&self) -> String;
     fn clone_box(&self) -> Box<dyn Action>;
 }
@@ -21,9 +21,9 @@ impl Intent {
         &self.description
     }
     
-    pub fn execute(&self, game_state: &mut GameState, source: EntityId, target: Option<EntityId>) {
+    pub fn execute(&self, game_state: &mut GameState, source: EntityId, targets: &[EntityId]) {
         for action in &self.actions {
-            action.resolve(game_state, source, target);
+            action.resolve(game_state, source, targets);
         }
     }
 }
