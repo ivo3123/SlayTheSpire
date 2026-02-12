@@ -1,0 +1,6 @@
+{
+  "name": "Defend",
+  "cost": 1,
+  "block": 5,
+  "description": "Gain {} Block."
+}

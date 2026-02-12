@@ -1,0 +1,5 @@
+{
+  "name": "Barricade",
+  "cost": 3,
+  "description": "Block is not removed at the start of your turn."
+}
