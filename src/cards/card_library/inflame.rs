@@ -1,5 +1,6 @@
 use crate::core::card::{Card, CardType, Cost, CardTargeting};
-use crate::cards::card_effects::{ApplyEffect, Ritual};
+use crate::cards::card_effects::ApplyStatusAction;
+use crate::core::base_state::StatusType;
 use serde::Deserialize;
 use std::fs;
 
@@ -30,13 +31,14 @@ pub fn inflame(instance_id: u32, upgraded: bool) -> Card {
         Cost::Fixed(config.cost),
         CardType::Power,
         CardTargeting::Self_,
-        vec![Box::new(ApplyEffect {
-            effect: Box::new(Ritual { amount: config.strength }),
+        vec![Box::new(ApplyStatusAction {
+            status_type: StatusType::Strength,
+            stacks: config.strength,
         })],
         config.description.replace("{}", &config.strength.to_string()),
         upgraded,
         upgrade,
-        false,
+        true,  // Power cards exhaust after use
     )
 }
 

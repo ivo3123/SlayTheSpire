@@ -127,4 +127,12 @@ impl State for Player {
     fn decay_debuffs(&mut self) {
         self.base_state.decay_debuffs()
     }
+    
+    fn clear_all_statuses(&mut self) {
+        self.base_state.clear_all_statuses()
+    }
+    
+    fn clear_all_modifiers(&mut self) {
+        self.base_state.clear_all_modifiers()
+    }
 }

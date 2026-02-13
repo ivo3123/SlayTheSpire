@@ -124,4 +124,12 @@ impl State for Dragonling {
     fn decay_debuffs(&mut self) {
         self.base.decay_debuffs()
     }
+    
+    fn clear_all_statuses(&mut self) {
+        self.base.clear_all_statuses()
+    }
+    
+    fn clear_all_modifiers(&mut self) {
+        self.base.clear_all_modifiers()
+    }
 }

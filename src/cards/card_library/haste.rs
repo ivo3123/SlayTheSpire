@@ -31,7 +31,7 @@ pub fn haste(instance_id: u32, upgraded: bool) -> Card {
         config.name,
         Cost::Fixed(config.cost),
         CardType::Skill,
-        CardTargeting::Self_,
+        CardTargeting::SingleEnemy,
         vec![
             Box::new(DrawCardsAction { count: config.draw }),
             Box::new(ApplyStatusAction { 

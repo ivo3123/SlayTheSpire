@@ -36,7 +36,7 @@ pub fn barricade(instance_id: u32, upgraded: bool) -> Card {
         config.description,
         upgraded,
         upgrade,
-        false,
+        true,  // Power cards exhaust after use
     )
 }
 

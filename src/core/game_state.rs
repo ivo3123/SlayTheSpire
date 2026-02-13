@@ -475,6 +475,8 @@ impl GameState {
         }
         
         self.remove_dead_enemies();
+        
+        self.turn_count += 1;
     }
     
     pub fn start_player_turn(&mut self) {
@@ -544,8 +546,6 @@ impl GameState {
         if !self.player.has_modifier(&Modifier::RetainHand) {
             self.discard_hand();
         }
-        
-        self.turn_count += 1;
     }
     
     pub fn start_enemy_phase(&mut self) {

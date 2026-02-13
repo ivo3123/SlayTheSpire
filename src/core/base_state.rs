@@ -56,6 +56,8 @@ pub trait State {
     fn remove_modifier(&mut self, modifier: &Modifier);
     fn remove_expired_statuses(&mut self);
     fn decay_debuffs(&mut self);
+    fn clear_all_statuses(&mut self);
+    fn clear_all_modifiers(&mut self);
 }
 
 impl BaseState {
@@ -146,7 +148,6 @@ impl State for BaseState {
     }
     
     fn remove_expired_statuses(&mut self) {
-        // Remove statuses with 0 or negative stacks
         self.statuses.retain(|s| s.stacks > 0);
     }
     
@@ -160,5 +161,13 @@ impl State for BaseState {
             }
         }
         self.remove_expired_statuses();
+    }
+    
+    fn clear_all_statuses(&mut self) {
+        self.statuses.clear();
+    }
+    
+    fn clear_all_modifiers(&mut self) {
+        self.modifiers.clear();
     }
 }
