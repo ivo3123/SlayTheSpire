@@ -1,5 +1,5 @@
 use crate::core::enemy::{BaseEnemy, Enemy};
-use crate::core::base_state::State;
+use crate::core::base_state::{State, StatusType, Status, Modifier};
 use crate::core::action::Intent;
 use crate::cards::{DamageEffect, BlockEffect};
 use serde::Deserialize;
@@ -77,23 +77,23 @@ impl State for Dragonling {
         self.base.is_alive()
     }
     
-    fn get_status(&self, status_type: &crate::core::base_state::StatusType) -> i32 {
+    fn get_status(&self, status_type: &StatusType) -> i32 {
         self.base.get_status(status_type)
     }
     
-    fn get_all_statuses(&self) -> &Vec<crate::core::base_state::Status> {
+    fn get_all_statuses(&self) -> &Vec<Status> {
         self.base.get_all_statuses()
     }
     
-    fn get_all_statuses_mut(&mut self) -> &mut Vec<crate::core::base_state::Status> {
+    fn get_all_statuses_mut(&mut self) -> &mut Vec<Status> {
         self.base.get_all_statuses_mut()
     }
     
-    fn add_status(&mut self, status_type: crate::core::base_state::StatusType, stacks: i32) {
+    fn add_status(&mut self, status_type: StatusType, stacks: i32) {
         self.base.add_status(status_type, stacks)
     }
     
-    fn reduce_status(&mut self, status_type: crate::core::base_state::StatusType, amount: i32) {
+    fn reduce_status(&mut self, status_type: StatusType, amount: i32) {
         self.base.reduce_status(status_type, amount)
     }
     
@@ -105,15 +105,15 @@ impl State for Dragonling {
         self.base.set_health(amount)
     }
     
-    fn has_modifier(&self, modifier: &crate::core::base_state::Modifier) -> bool {
+    fn has_modifier(&self, modifier: &Modifier) -> bool {
         self.base.has_modifier(modifier)
     }
     
-    fn add_modifier(&mut self, modifier: crate::core::base_state::Modifier) {
+    fn add_modifier(&mut self, modifier: Modifier) {
         self.base.add_modifier(modifier)
     }
     
-    fn remove_modifier(&mut self, modifier: &crate::core::base_state::Modifier) {
+    fn remove_modifier(&mut self, modifier: &Modifier) {
         self.base.remove_modifier(modifier)
     }
     

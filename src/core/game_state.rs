@@ -2,6 +2,8 @@ use crate::core::{Player, card::Card};
 use crate::core::base_state::{StatusType, Modifier, State};
 use crate::core::enemy::Enemy;
 use crate::core::action::Intent;
+use crate::core::effects::Effect;
+use crate::core::card::CardTargeting;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
@@ -41,7 +43,7 @@ impl TurnRecord {
 pub struct GameState {
     player: Player,
     enemies: Vec<Box<dyn Enemy>>,
-    effects: Vec<(EntityId, Box<dyn crate::core::effects::Effect>)>,
+    effects: Vec<(EntityId, Box<dyn Effect>)>,
     
     draw_pile: Vec<Card>,
     hand: Vec<Card>,
@@ -146,7 +148,7 @@ impl GameState {
         game
     }
     
-    pub fn add_effect(&mut self, owner: EntityId, effect: Box<dyn crate::core::effects::Effect>) {
+    pub fn add_effect(&mut self, owner: EntityId, effect: Box<dyn Effect>) {
         self.effects.push((owner, effect));
     }
     
@@ -293,8 +295,6 @@ impl GameState {
         
         let card = &self.hand[hand_index];
         let targeting = card.targeting();
-        
-        use crate::core::card::CardTargeting;
         
         let actual_targets: Vec<EntityId> = match targeting {
             CardTargeting::SingleEnemy => {

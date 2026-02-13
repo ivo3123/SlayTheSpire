@@ -1,4 +1,4 @@
-use SlayTheSpire::core::{GameState, Player, STSClass, EntityId, State, StatusType};
+use SlayTheSpire::core::{GameState, Player, STSClass, EntityId, State, StatusType, Enemy};
 use SlayTheSpire::enemies::Dragonling;
 use SlayTheSpire::cards::{strike, defend, inflame, upgrade_card};
 
@@ -14,8 +14,8 @@ fn test_complete_combat_scenario() {
     }
     
     let enemies = vec![
-        Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>,
-        Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>,
+        Box::new(Dragonling::new()) as Box<dyn Enemy>,
+        Box::new(Dragonling::new()) as Box<dyn Enemy>,
     ];
     
     let mut game = GameState::new_with_deck(player, enemies, starting_deck);
@@ -47,7 +47,7 @@ fn test_complete_combat_scenario() {
 #[test]
 fn test_victory_condition() {
     let player = Player::new(STSClass::Ironclad, "Hero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     assert!(!game.is_combat_over());
@@ -62,7 +62,7 @@ fn test_victory_condition() {
 #[test]
 fn test_defeat_condition() {
     let player = Player::new(STSClass::Ironclad, "Hero".to_string(), 10);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     assert!(!game.is_combat_over());
@@ -77,7 +77,7 @@ fn test_defeat_condition() {
 #[test]
 fn test_upgrade_system_in_combat() {
     let player = Player::new(STSClass::Ironclad, "Hero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();
@@ -108,7 +108,7 @@ fn test_upgrade_system_in_combat() {
 #[test]
 fn test_multi_turn_status_effects() {
     let player = Player::new(STSClass::Ironclad, "Hero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();

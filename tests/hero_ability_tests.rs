@@ -1,11 +1,11 @@
-use SlayTheSpire::core::{GameState, Player, STSClass, State};
+use SlayTheSpire::core::{GameState, Player, STSClass, State, Enemy};
 use SlayTheSpire::enemies::Dragonling;
 use SlayTheSpire::cards::{strike, defend, inflame};
 
 #[test]
 fn test_hero_ability_basic() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let deck = vec![strike(1, false), defend(2, false), inflame(3, false)];
     let mut game = GameState::new_with_deck(player, enemies, deck);
     
@@ -28,7 +28,7 @@ fn test_hero_ability_basic() {
 #[test]
 fn test_hero_ability_exhausts_rightmost() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let deck = vec![strike(1, false), defend(2, false)];
     let mut game = GameState::new_with_deck(player, enemies, deck);
     
@@ -45,7 +45,7 @@ fn test_hero_ability_exhausts_rightmost() {
 #[test]
 fn test_hero_ability_cannot_use_twice() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let deck = vec![strike(1, false), defend(2, false), inflame(3, false)];
     let mut game = GameState::new_with_deck(player, enemies, deck);
     
@@ -60,7 +60,7 @@ fn test_hero_ability_cannot_use_twice() {
 #[test]
 fn test_hero_ability_requires_energy() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let deck = vec![strike(1, false)];
     let mut game = GameState::new_with_deck(player, enemies, deck);
     
@@ -74,7 +74,7 @@ fn test_hero_ability_requires_energy() {
 #[test]
 fn test_hero_ability_requires_cards_in_hand() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();
@@ -87,7 +87,7 @@ fn test_hero_ability_requires_cards_in_hand() {
 #[test]
 fn test_hero_ability_adds_upgraded_next_turn() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let deck = vec![strike(1, false), defend(2, false), inflame(3, false)];
     let mut game = GameState::new_with_deck(player, enemies, deck);
     
@@ -108,7 +108,7 @@ fn test_hero_ability_adds_upgraded_next_turn() {
 #[test]
 fn test_hero_ability_resets_each_turn() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let deck = vec![strike(1, false), defend(2, false), inflame(3, false), strike(4, false)];
     let mut game = GameState::new_with_deck(player, enemies, deck);
     

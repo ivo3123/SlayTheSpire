@@ -1,4 +1,4 @@
-use SlayTheSpire::core::{GameState, Player, STSClass, EntityId, State};
+use SlayTheSpire::core::{GameState, Player, STSClass, EntityId, State, Enemy};
 use SlayTheSpire::enemies::Dragonling;
 use SlayTheSpire::cards::{strike, defend, inflame, barricade, whirlwind, haste};
 
@@ -21,7 +21,7 @@ fn test_upgraded_card() {
 #[test]
 fn test_strike_deals_damage() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();
@@ -38,7 +38,7 @@ fn test_strike_deals_damage() {
 #[test]
 fn test_defend_gains_block() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();
@@ -53,7 +53,7 @@ fn test_defend_gains_block() {
 #[test]
 fn test_upgraded_defend_more_block() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();
@@ -67,7 +67,7 @@ fn test_upgraded_defend_more_block() {
 #[test]
 fn test_exhaust_card() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();
@@ -85,8 +85,8 @@ fn test_exhaust_card() {
 fn test_x_cost_whirlwind() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
     let enemies = vec![
-        Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>,
-        Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>,
+        Box::new(Dragonling::new()) as Box<dyn Enemy>,
+        Box::new(Dragonling::new()) as Box<dyn Enemy>,
     ];
     let mut game = GameState::new(player, enemies);
     
@@ -106,8 +106,8 @@ fn test_x_cost_whirlwind() {
 fn test_card_targeting() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
     let enemies = vec![
-        Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>,
-        Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>,
+        Box::new(Dragonling::new()) as Box<dyn Enemy>,
+        Box::new(Dragonling::new()) as Box<dyn Enemy>,
     ];
     let mut game = GameState::new(player, enemies);
     

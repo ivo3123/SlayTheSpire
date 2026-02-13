@@ -1,11 +1,11 @@
-use SlayTheSpire::core::{GameState, Player, STSClass, EntityId, State, StatusType};
+use SlayTheSpire::core::{GameState, Player, STSClass, EntityId, State, StatusType, Enemy};
 use SlayTheSpire::enemies::Dragonling;
 use SlayTheSpire::cards::{strike, defend};
 
 #[test]
 fn test_energy_system() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();
@@ -21,7 +21,7 @@ fn test_energy_system() {
 #[test]
 fn test_insufficient_energy() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();
@@ -37,7 +37,7 @@ fn test_insufficient_energy() {
 #[test]
 fn test_block_absorbs_damage() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();
@@ -56,7 +56,7 @@ fn test_block_absorbs_damage() {
 #[test]
 fn test_damage_exceeds_block() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.start_player_turn();
@@ -75,7 +75,7 @@ fn test_damage_exceeds_block() {
 #[test]
 fn test_draw_and_discard() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let deck = vec![strike(1, false), strike(2, false), defend(3, false)];
     let mut game = GameState::new_with_deck(player, enemies, deck);
     
@@ -96,7 +96,7 @@ fn test_draw_and_discard() {
 #[test]
 fn test_shuffle_when_draw_pile_empty() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let deck = vec![strike(1, false), strike(2, false)];
     let mut game = GameState::new_with_deck(player, enemies, deck);
     
@@ -113,7 +113,7 @@ fn test_shuffle_when_draw_pile_empty() {
 #[test]
 fn test_vulnerable_increases_damage() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.deal_damage(EntityId::Player, EntityId::Enemy(0), 10);
@@ -128,7 +128,7 @@ fn test_vulnerable_increases_damage() {
 #[test]
 fn test_weak_reduces_damage() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.deal_damage(EntityId::Enemy(0), EntityId::Player, 10);
@@ -145,7 +145,7 @@ fn test_weak_reduces_damage() {
 #[test]
 fn test_strength_increases_damage() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     game.add_status(EntityId::Player, StatusType::Strength, 3);
@@ -158,8 +158,8 @@ fn test_strength_increases_damage() {
 fn test_death_removes_enemies() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
     let enemies = vec![
-        Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>,
-        Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>,
+        Box::new(Dragonling::new()) as Box<dyn Enemy>,
+        Box::new(Dragonling::new()) as Box<dyn Enemy>,
     ];
     let mut game = GameState::new(player, enemies);
     
@@ -175,7 +175,7 @@ fn test_death_removes_enemies() {
 #[test]
 fn test_combat_over_when_all_enemies_dead() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 100);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     assert!(!game.is_combat_over());
@@ -189,7 +189,7 @@ fn test_combat_over_when_all_enemies_dead() {
 #[test]
 fn test_combat_over_when_player_dead() {
     let player = Player::new(STSClass::Ironclad, "TestHero".to_string(), 10);
-    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn SlayTheSpire::core::Enemy>];
+    let enemies = vec![Box::new(Dragonling::new()) as Box<dyn Enemy>];
     let mut game = GameState::new(player, enemies);
     
     assert!(!game.is_combat_over());

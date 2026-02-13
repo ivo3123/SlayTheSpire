@@ -1,4 +1,4 @@
-use crate::core::base_state::{BaseState, State, StatusType, Status};
+use crate::core::base_state::{BaseState, State, StatusType, Status, Modifier};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum STSClass {
@@ -108,15 +108,15 @@ impl State for Player {
         self.base_state.set_health(amount)
     }
     
-    fn has_modifier(&self, modifier: &crate::core::base_state::Modifier) -> bool {
+    fn has_modifier(&self, modifier: &Modifier) -> bool {
         self.base_state.has_modifier(modifier)
     }
     
-    fn add_modifier(&mut self, modifier: crate::core::base_state::Modifier) {
+    fn add_modifier(&mut self, modifier: Modifier) {
         self.base_state.add_modifier(modifier)
     }
     
-    fn remove_modifier(&mut self, modifier: &crate::core::base_state::Modifier) {
+    fn remove_modifier(&mut self, modifier: &Modifier) {
         self.base_state.remove_modifier(modifier)
     }
     
