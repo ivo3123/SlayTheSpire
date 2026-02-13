@@ -14,6 +14,7 @@ pub struct Player {
     base_state: BaseState,
     max_energy: i32,
     energy: i32,
+    hero_ability_used_this_turn: bool,
 }
 
 impl Player {
@@ -25,6 +26,7 @@ impl Player {
             base_state: BaseState::new(name, max_health),
             max_energy: initial_energy,
             energy: initial_energy,
+            hero_ability_used_this_turn: false,
         }
     }
     
@@ -42,6 +44,18 @@ impl Player {
     
     pub fn refill_energy(&mut self) {
         self.energy = self.max_energy;
+    }
+    
+    pub fn hero_ability_used(&self) -> bool {
+        self.hero_ability_used_this_turn
+    }
+    
+    pub fn use_hero_ability(&mut self) {
+        self.hero_ability_used_this_turn = true;
+    }
+    
+    pub fn reset_hero_ability(&mut self) {
+        self.hero_ability_used_this_turn = false;
     }
 }
 

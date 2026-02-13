@@ -51,6 +51,8 @@ pub struct GameState {
     turn_history: Vec<TurnRecord>,
     current_turn_record: TurnRecord,
     turn_count: usize,
+    
+    pending_upgraded_card: Option<Card>,
 }
 
 impl GameState {
@@ -66,6 +68,7 @@ impl GameState {
             turn_history: Vec::new(),
             current_turn_record: TurnRecord::new(0),
             turn_count: 0,
+            pending_upgraded_card: None,
         }
     }
     
@@ -165,6 +168,19 @@ impl GameState {
                 self.enemies.get(id)
                     .map(|e| e.get_status(&status_type))
                     .unwrap_or(0)
+            }
+        }
+    }
+    
+    pub fn add_status(&mut self, entity: EntityId, status_type: StatusType, stacks: i32) {
+        match entity {
+            EntityId::Player => {
+                self.player.add_status(status_type, stacks);
+            }
+            EntityId::Enemy(id) => {
+                if let Some(enemy) = self.enemies.get_mut(id) {
+                    enemy.add_status(status_type, stacks);
+                }
             }
         }
     }
@@ -476,6 +492,11 @@ impl GameState {
         }
         
         self.player.refill_energy();
+        self.player.reset_hero_ability();
+        
+        if let Some(upgraded_card) = self.pending_upgraded_card.take() {
+            self.hand.push(upgraded_card);
+        }
         
         let default_card_drawn_at_start_of_turn = 5;
         self.draw_cards(default_card_drawn_at_start_of_turn);
@@ -552,6 +573,39 @@ impl GameState {
     
     pub fn living_enemy_count(&self) -> usize {
         self.enemies.iter().filter(|e| e.is_alive()).count()
+    }
+    
+    pub fn use_hero_ability(&mut self) -> Result<(), String> {
+        const HERO_ABILITY_COST: i32 = 1;
+        const HERO_ABILITY_DAMAGE: i32 = 2;
+        
+        if self.player.hero_ability_used() {
+            return Err("Hero ability already used this turn".to_string());
+        }
+        
+        if self.player.get_energy() < HERO_ABILITY_COST {
+            return Err(format!("Not enough energy: need {}, have {}", 
+                HERO_ABILITY_COST, self.player.get_energy()));
+        }
+        
+        if self.hand.is_empty() {
+            return Err("No cards in hand to exhaust".to_string());
+        }
+        
+        self.player.spend_energy(HERO_ABILITY_COST);
+        self.player.use_hero_ability();
+        
+        let card_index = self.hand.len() - 1;
+        let card = self.hand.remove(card_index);
+        
+        let upgraded_card = (card.upgrade_fn())(card.instance_id());
+        self.pending_upgraded_card = Some(upgraded_card);
+        
+        self.exhaust_pile.push(card);
+        
+        self.modify_hp(EntityId::Player, -HERO_ABILITY_DAMAGE);
+        
+        Ok(())
     }
 }
 
