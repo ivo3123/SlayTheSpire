@@ -1,0 +1,12 @@
+{
+  "regular": {
+    "name": "Whirlwind",
+    "damage_per_energy": 5,
+    "description": "Deal {} damage to ALL enemies X times."
+  },
+  "upgraded": {
+    "name": "Whirlwind+",
+    "damage_per_energy": 8,
+    "description": "Deal {} damage to ALL enemies X times."
+  }
+}

@@ -36,6 +36,7 @@ pub fn inflame(instance_id: u32, upgraded: bool) -> Card {
         config.description.replace("{}", &config.strength.to_string()),
         upgraded,
         upgrade,
+        false,
     )
 }
 

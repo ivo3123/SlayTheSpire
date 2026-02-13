@@ -34,6 +34,7 @@ pub fn strike(instance_id: u32, upgraded: bool) -> Card {
         config.description.replace("{}", &config.damage.to_string()),
         upgraded,
         upgrade,
+        false,
     )
 }
 

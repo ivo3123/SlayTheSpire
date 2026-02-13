@@ -36,6 +36,7 @@ pub struct Card {
     description: String,
     upgraded: bool,
     upgrade_fn: fn(u32) -> Card,
+    exhaust: bool,
 }
 
 impl Clone for Card {
@@ -52,6 +53,7 @@ impl Clone for Card {
             description: self.description.clone(),
             upgraded: self.upgraded,
             upgrade_fn: self.upgrade_fn,
+            exhaust: self.exhaust,
         }
     }
 }
@@ -68,6 +70,7 @@ impl Card {
         description: String,
         upgraded: bool,
         upgrade_fn: fn(u32) -> Card,
+        exhaust: bool,
     ) -> Self {
         Card {
             instance_id,
@@ -81,6 +84,7 @@ impl Card {
             description,
             upgraded,
             upgrade_fn,
+            exhaust,
         }
     }
 
@@ -146,5 +150,9 @@ impl Card {
     
     pub fn upgrade_fn(&self) -> fn(u32) -> Card {
         self.upgrade_fn
+    }
+    
+    pub fn exhaust(&self) -> bool {
+        self.exhaust
     }
 }

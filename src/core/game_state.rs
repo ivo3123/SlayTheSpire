@@ -336,7 +336,13 @@ impl GameState {
             source: EntityId::Player,
         });
         
-        self.add_card_to_discard(card);
+        if card.exhaust() {
+            self.exhaust_pile.push(card);
+        } else {
+            self.add_card_to_discard(card);
+        }
+        
+        self.remove_dead_enemies();
         
         Ok(())
     }
@@ -410,8 +416,16 @@ impl GameState {
         self.discard_pile.push(card);
     }
     
+    pub fn add_card_to_exhaust(&mut self, card: Card) {
+        self.exhaust_pile.push(card);
+    }
+    
     pub fn add_card_to_draw_pile(&mut self, card: Card) {
         self.draw_pile.push(card);
+    }
+    
+    pub fn remove_dead_enemies(&mut self) {
+        self.enemies.retain(|enemy| enemy.is_alive());
     }
     
     pub fn execute_enemy_intent(&mut self, enemy_id: usize, intent: &Intent, targets: &[EntityId]) {
@@ -443,6 +457,8 @@ impl GameState {
             
             self.process_enemy_turn_end(enemy_id);
         }
+        
+        self.remove_dead_enemies();
     }
     
     pub fn start_player_turn(&mut self) {
@@ -536,10 +552,6 @@ impl GameState {
     
     pub fn living_enemy_count(&self) -> usize {
         self.enemies.iter().filter(|e| e.is_alive()).count()
-    }
-    
-    pub fn remove_dead_enemies(&mut self) {
-        self.enemies.retain(|enemy| enemy.is_alive());
     }
 }
 

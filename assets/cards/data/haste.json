@@ -1,0 +1,16 @@
+{
+  "regular": {
+    "name": "Haste",
+    "cost": 1,
+    "draw": 2,
+    "vulnerable": 2,
+    "description": "Draw {draw} cards. Apply {vulnerable} Vulnerable to yourself. Exhaust."
+  },
+  "upgraded": {
+    "name": "Haste+",
+    "cost": 0,
+    "draw": 2,
+    "vulnerable": 2,
+    "description": "Draw {draw} cards. Apply {vulnerable} Vulnerable to yourself. Exhaust."
+  }
+}

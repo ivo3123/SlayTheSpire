@@ -34,6 +34,7 @@ pub fn defend(instance_id: u32, upgraded: bool) -> Card {
         config.description.replace("{}", &config.block.to_string()),
         upgraded,
         upgrade,
+        false,
     )
 }
 
