@@ -2,6 +2,14 @@ use crate::core::enemy::{BaseEnemy, Enemy};
 use crate::core::base_state::State;
 use crate::core::action::Intent;
 use crate::cards::{DamageEffect, BlockEffect};
+use serde::Deserialize;
+use std::fs;
+
+#[derive(Deserialize)]
+struct DragonlingConfig {
+    name: String,
+    max_health: i32,
+}
 
 pub struct Dragonling {
     base: BaseEnemy,
@@ -9,8 +17,12 @@ pub struct Dragonling {
 
 impl Dragonling {
     pub fn new() -> Self {
+        let config_str = fs::read_to_string("assets/enemies/data/dragonling.json")
+            .expect("Failed to read dragonling.json");
+        let config: DragonlingConfig = serde_json::from_str(&config_str).unwrap();
+        
         Dragonling {
-            base: BaseEnemy::new("dragonling".to_string(), "Dragonling".to_string(), 50),
+            base: BaseEnemy::new("dragonling".to_string(), config.name, config.max_health),
         }
     }
 }

@@ -11,10 +11,17 @@ struct DefendConfig {
     description: String,
 }
 
-pub fn defend(instance_id: u32) -> Card {
+#[derive(Deserialize)]
+struct DefendFullConfig {
+    regular: DefendConfig,
+    upgraded: DefendConfig,
+}
+
+pub fn defend(instance_id: u32, upgraded: bool) -> Card {
     let config_str = fs::read_to_string("assets/cards/data/defend.json")
         .expect("Failed to read defend.json");
-    let config: DefendConfig = serde_json::from_str(&config_str).unwrap();
+    let full_config: DefendFullConfig = serde_json::from_str(&config_str).unwrap();
+    let config = if upgraded { full_config.upgraded } else { full_config.regular };
     
     Card::new(
         instance_id,
@@ -25,5 +32,11 @@ pub fn defend(instance_id: u32) -> Card {
         CardTargeting::Self_,
         vec![Box::new(BlockEffect { amount: config.block })],
         config.description.replace("{}", &config.block.to_string()),
+        upgraded,
+        upgrade,
     )
+}
+
+pub fn upgrade(instance_id: u32) -> Card {
+    defend(instance_id, true)
 }

@@ -11,10 +11,17 @@ struct BarricadeConfig {
     description: String,
 }
 
-pub fn barricade(instance_id: u32) -> Card {
+#[derive(Deserialize)]
+struct BarricadeFullConfig {
+    regular: BarricadeConfig,
+    upgraded: BarricadeConfig,
+}
+
+pub fn barricade(instance_id: u32, upgraded: bool) -> Card {
     let config_str = fs::read_to_string("assets/cards/data/barricade.json")
         .expect("Failed to read barricade.json");
-    let config: BarricadeConfig = serde_json::from_str(&config_str).unwrap();
+    let full_config: BarricadeFullConfig = serde_json::from_str(&config_str).unwrap();
+    let config = if upgraded { full_config.upgraded } else { full_config.regular };
     
     Card::new(
         instance_id,
@@ -27,5 +34,11 @@ pub fn barricade(instance_id: u32) -> Card {
             modifier: Modifier::RetainBlock,
         })],
         config.description,
+        upgraded,
+        upgrade,
     )
+}
+
+pub fn upgrade(instance_id: u32) -> Card {
+    barricade(instance_id, true)
 }

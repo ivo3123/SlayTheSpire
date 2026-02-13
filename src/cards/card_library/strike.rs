@@ -11,10 +11,17 @@ struct StrikeConfig {
     description: String,
 }
 
-pub fn strike(instance_id: u32) -> Card {
+#[derive(Deserialize)]
+struct StrikeFullConfig {
+    regular: StrikeConfig,
+    upgraded: StrikeConfig,
+}
+
+pub fn strike(instance_id: u32, upgraded: bool) -> Card {
     let config_str = fs::read_to_string("assets/cards/data/strike.json")
         .expect("Failed to read strike.json");
-    let config: StrikeConfig = serde_json::from_str(&config_str).unwrap();
+    let full_config: StrikeFullConfig = serde_json::from_str(&config_str).unwrap();
+    let config = if upgraded { full_config.upgraded } else { full_config.regular };
     
     Card::new(
         instance_id,
@@ -25,5 +32,11 @@ pub fn strike(instance_id: u32) -> Card {
         CardTargeting::SingleEnemy,
         vec![Box::new(DamageEffect { amount: config.damage })],
         config.description.replace("{}", &config.damage.to_string()),
+        upgraded,
+        upgrade,
     )
+}
+
+pub fn upgrade(instance_id: u32) -> Card {
+    strike(instance_id, true)
 }

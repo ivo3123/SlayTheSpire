@@ -34,6 +34,8 @@ pub struct Card {
     targeting: CardTargeting,
     effects: Vec<Box<dyn Action>>,
     description: String,
+    upgraded: bool,
+    upgrade_fn: fn(u32) -> Card,
 }
 
 impl Clone for Card {
@@ -48,6 +50,8 @@ impl Clone for Card {
             targeting: self.targeting,
             effects: self.effects.iter().map(|e| e.clone_box()).collect(),
             description: self.description.clone(),
+            upgraded: self.upgraded,
+            upgrade_fn: self.upgrade_fn,
         }
     }
 }
@@ -62,6 +66,8 @@ impl Card {
         targeting: CardTargeting,
         effects: Vec<Box<dyn Action>>,
         description: String,
+        upgraded: bool,
+        upgrade_fn: fn(u32) -> Card,
     ) -> Self {
         Card {
             instance_id,
@@ -73,6 +79,8 @@ impl Card {
             targeting,
             effects,
             description,
+            upgraded,
+            upgrade_fn,
         }
     }
 
@@ -130,5 +138,13 @@ impl Card {
     
     pub fn description(&self) -> &str {
         &self.description
+    }
+    
+    pub fn is_upgraded(&self) -> bool {
+        self.upgraded
+    }
+    
+    pub fn upgrade_fn(&self) -> fn(u32) -> Card {
+        self.upgrade_fn
     }
 }

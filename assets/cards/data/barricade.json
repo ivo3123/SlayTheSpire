@@ -1,5 +1,12 @@
 {
-  "name": "Barricade",
-  "cost": 3,
-  "description": "Block is not removed at the start of your turn."
+  "regular": {
+    "name": "Barricade",
+    "cost": 3,
+    "description": "Block is not removed at the start of your turn."
+  },
+  "upgraded": {
+    "name": "Barricade+",
+    "cost": 1,
+    "description": "Block is not removed at the start of your turn."
+  }
 }

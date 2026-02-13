@@ -1,6 +1,14 @@
 {
-  "name": "Inflame",
-  "cost": 1,
-  "strength": 2,
-  "description": "At the end of your turn, gain {} Strength."
+  "regular": {
+    "name": "Inflame",
+    "cost": 1,
+    "strength": 2,
+    "description": "At the end of your turn, gain {} Strength."
+  },
+  "upgraded": {
+    "name": "Inflame+",
+    "cost": 1,
+    "strength": 5,
+    "description": "At the end of your turn, gain {} Strength."
+  }
 }

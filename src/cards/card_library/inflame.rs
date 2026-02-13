@@ -11,10 +11,17 @@ struct InflameConfig {
     description: String,
 }
 
-pub fn inflame(instance_id: u32) -> Card {
+#[derive(Deserialize)]
+struct InflameFullConfig {
+    regular: InflameConfig,
+    upgraded: InflameConfig,
+}
+
+pub fn inflame(instance_id: u32, upgraded: bool) -> Card {
     let config_str = fs::read_to_string("assets/cards/data/inflame.json")
         .expect("Failed to read inflame.json");
-    let config: InflameConfig = serde_json::from_str(&config_str).unwrap();
+    let full_config: InflameFullConfig = serde_json::from_str(&config_str).unwrap();
+    let config = if upgraded { full_config.upgraded } else { full_config.regular };
     
     Card::new(
         instance_id,
@@ -27,5 +34,11 @@ pub fn inflame(instance_id: u32) -> Card {
             effect: Box::new(Ritual { amount: config.strength }),
         })],
         config.description.replace("{}", &config.strength.to_string()),
+        upgraded,
+        upgrade,
     )
+}
+
+pub fn upgrade(instance_id: u32) -> Card {
+    inflame(instance_id, true)
 }

@@ -1,6 +1,14 @@
 {
-  "name": "Strike",
-  "cost": 1,
-  "damage": 6,
-  "description": "Deal {} damage."
+  "regular": {
+    "name": "Strike",
+    "cost": 1,
+    "damage": 6,
+    "description": "Deal {} damage."
+  },
+  "upgraded": {
+    "name": "Strike+",
+    "cost": 1,
+    "damage": 15,
+    "description": "Deal {} damage."
+  }
 }
