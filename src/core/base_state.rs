@@ -9,10 +9,11 @@ pub enum StatusType {
     Frail,
 }
 
+/// Enum for game breaking mechanics
 #[derive(Clone, Debug, PartialEq)]
 pub enum Modifier {
-    RetainHand,   // Don't discard hand at end of turn (e.g., from a relic)
-    RetainBlock,  // Don't remove block at start of turn (Barricade card)
+    RetainHand,
+    RetainBlock,
 }
 
 #[derive(Clone, Debug)]
@@ -150,13 +151,12 @@ impl State for BaseState {
     }
     
     fn decay_debuffs(&mut self) {
-        // Decrement temporary debuffs
         for status in &mut self.statuses {
             match status.status_type {
                 StatusType::Vulnerable | StatusType::Weak | StatusType::Frail => {
                     status.stacks -= 1;
                 }
-                _ => {} // Strength, Dexterity, Poison don't auto-decay
+                _ => {}
             }
         }
         self.remove_expired_statuses();
