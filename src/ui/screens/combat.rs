@@ -215,10 +215,8 @@ impl CombatScreen {
             let enemy_x = start_x + (visual_index as f32) * (enemy_w + 30.0);
             let enemy_y = 200.0;
             
-            // Draw enemy intent
             self.draw_enemy_intent(ctx, canvas, enemy, enemy_x, enemy_y - 50.0)?;
             
-            // Draw enemy sprite/animation
             let animation_key = "dragonling_idle";
             let frame_count = self.assets.get_animation_frame_count(animation_key);
             
