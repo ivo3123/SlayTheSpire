@@ -1,0 +1,16 @@
+{
+  "regular": {
+    "name": "Quick Strike",
+    "cost": 1,
+    "damage": 6,
+    "energy_next_turn": 1,
+    "description": "Deal {damage} damage. Next turn, gain {energy} Energy."
+  },
+  "upgraded": {
+    "name": "Quick Strike+",
+    "cost": 1,
+    "damage": 10,
+    "energy_next_turn": 2,
+    "description": "Deal {damage} damage. Next turn, gain {energy} Energy."
+  }
+}

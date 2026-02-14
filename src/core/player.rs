@@ -42,6 +42,10 @@ impl Player {
         self.energy = (self.energy - amount).max(0);
     }
     
+    pub fn gain_energy(&mut self, amount: i32) {
+        self.energy += amount;
+    }
+    
     pub fn refill_energy(&mut self) {
         self.energy = self.max_energy;
     }
