@@ -75,7 +75,7 @@ fn test_exhaust_card() {
     assert!(haste_card.exhaust());
     game.add_card_to_hand(haste_card);
     
-    game.play_card(0, None).unwrap();
+    game.play_card(0, Some(EntityId::Enemy(0))).unwrap();
     
     assert_eq!(game.exhaust_pile().len(), 1);
     assert_eq!(game.discard_pile().len(), 0);
